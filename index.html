@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic 1-For-1 Video Generation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        <div class="logo-icon">✨</div>
+                        <h1>Magic 1-For-1</h1>
+                    </div>
+                    <p class="tagline">Generating One Minute Video Clips within One Minute</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="container">
+                <!-- Generation Mode Selector -->
+                <div class="mode-selector">
+                    <button class="mode-btn active" data-mode="text-to-video">
+                        <div class="mode-icon">📝</div>
+                        <span>Text to Video</span>
+                    </button>
+                    <button class="mode-btn" data-mode="image-to-video">
+                        <div class="mode-icon">🖼️</div>
+                        <span>Image to Video</span>
+                    </button>
+                </div>
+
+                <!-- Generation Form -->
+                <div class="generation-form">
+                    <div class="form-section">
+                        <label for="prompt" class="form-label">
+                            <span>Prompt</span>
+                            <span class="required">*</span>
+                        </label>
+                        <textarea 
+                            id="prompt" 
+                            class="form-textarea" 
+                            placeholder="Describe the video you want to generate... (e.g., A cat playing piano in a cozy living room)"
+                            rows="3"
+                        ></textarea>
+                    </div>
+
+                    <div class="form-section image-upload-section" style="display: none;">
+                        <label class="form-label">
+                            <span>Reference Image</span>
+                            <span class="required">*</span>
+                        </label>
+                        <div class="image-upload-area" id="imageUpload">
+                            <div class="upload-content">
+                                <div class="upload-icon">📁</div>
+                                <p>Click to upload or drag and drop</p>
+                                <p class="upload-hint">PNG, JPG up to 10MB</p>
+                            </div>
+                            <input type="file" id="imageInput" accept="image/*" hidden>
+                        </div>
+                        <div class="image-preview" id="imagePreview" style="display: none;">
+                            <img id="previewImg" alt="Preview">
+                            <button class="remove-image" id="removeImage">×</button>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Settings -->
+                    <div class="advanced-settings">
+                        <button class="settings-toggle" id="settingsToggle">
+                            <span>Advanced Settings</span>
+                            <span class="toggle-icon">▼</span>
+                        </button>
+                        
+                        <div class="settings-content" id="settingsContent">
+                            <div class="settings-grid">
+                                <div class="setting-item">
+                                    <label for="videoLength" class="setting-label">Video Length (frames)</label>
+                                    <select id="videoLength" class="setting-select">
+                                        <option value="21">21 frames (~1s)</option>
+                                        <option value="41">41 frames (~2s)</option>
+                                        <option value="61">61 frames (~3s)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <label for="guidanceScale" class="setting-label">Guidance Scale</label>
+                                    <input type="range" id="guidanceScale" min="1" max="3" step="0.1" value="1.2" class="setting-range">
+                                    <span class="range-value">1.2</span>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <label for="inferenceSteps" class="setting-label">Inference Steps</label>
+                                    <select id="inferenceSteps" class="setting-select">
+                                        <option value="4">4 steps (fastest)</option>
+                                        <option value="8">8 steps</option>
+                                        <option value="16">16 steps</option>
+                                        <option value="30">30 steps (highest quality)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <label for="seed" class="setting-label">Seed (optional)</label>
+                                    <input type="number" id="seed" placeholder="Random" class="setting-input">
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <label class="setting-checkbox">
+                                        <input type="checkbox" id="quantization">
+                                        <span class="checkmark"></span>
+                                        Enable Quantization (faster, less memory)
+                                    </label>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <label class="setting-checkbox">
+                                        <input type="checkbox" id="lowMemory">
+                                        <span class="checkmark"></span>
+                                        Low Memory Mode
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button class="generate-btn" id="generateBtn">
+                        <span class="btn-text">Generate Video</span>
+                        <div class="btn-loader" style="display: none;">
+                            <div class="spinner"></div>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Progress Section -->
+                <div class="progress-section" id="progressSection" style="display: none;">
+                    <div class="progress-header">
+                        <h3>Generating Video...</h3>
+                        <div class="progress-time">
+                            <span id="progressTime">00:00</span>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-status" id="progressStatus">
+                        Initializing model...
+                    </div>
+                    <div class="progress-logs" id="progressLogs"></div>
+                </div>
+
+                <!-- Results Section -->
+                <div class="results-section" id="resultsSection" style="display: none;">
+                    <h3>Generated Video</h3>
+                    <div class="video-container">
+                        <video id="resultVideo" controls>
+                            Your browser does not support the video tag.
+                        </video>
+                        <div class="video-actions">
+                            <button class="action-btn download-btn" id="downloadBtn">
+                                <span>📥</span>
+                                Download
+                            </button>
+                            <button class="action-btn share-btn" id="shareBtn">
+                                <span>🔗</span>
+                                Share
+                            </button>
+                            <button class="action-btn regenerate-btn" id="regenerateBtn">
+                                <span>🔄</span>
+                                Regenerate
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Generation Info -->
+                    <div class="generation-info">
+                        <div class="info-item">
+                            <span class="info-label">Generation Time:</span>
+                            <span class="info-value" id="generationTime">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Model:</span>
+                            <span class="info-value">Magic 1-For-1</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Resolution:</span>
+                            <span class="info-value" id="videoResolution">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gallery Section -->
+                <div class="gallery-section">
+                    <h3>Recent Generations</h3>
+                    <div class="gallery-grid" id="galleryGrid">
+                        <!-- Gallery items will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <p>&copy; 2025 Magic 1-For-1. Research project for efficient video generation.</p>
+                    <div class="footer-links">
+                        <a href="https://magic-141.github.io/Magic-141/" target="_blank">Project Page</a>
+                        <a href="#" onclick="showAbout()">About</a>
+                        <a href="#" onclick="showHelp()">Help</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="aboutModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>About Magic 1-For-1</h3>
+                <button class="modal-close" onclick="closeModal('aboutModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Magic 1-For-1</strong> is an efficient video generation model designed to optimize memory usage and reduce inference latency.</p>
+                <p>It decomposes the text-to-video generation task into two sub-tasks: <strong>text-to-image generation</strong> and <strong>image-to-video generation</strong>, enabling more efficient training and distillation.</p>
+                <h4>Key Features:</h4>
+                <ul>
+                    <li>Generate one minute video clips within one minute</li>
+                    <li>Efficient memory usage with quantization support</li>
+                    <li>High-quality video generation with various customization options</li>
+                    <li>Support for both text-to-video and image-to-video generation</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="helpModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Help & Tips</h3>
+                <button class="modal-close" onclick="closeModal('helpModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h4>Getting Started:</h4>
+                <ol>
+                    <li>Choose your generation mode (Text-to-Video or Image-to-Video)</li>
+                    <li>Enter a descriptive prompt</li>
+                    <li>For Image-to-Video, upload a reference image</li>
+                    <li>Adjust advanced settings if needed</li>
+                    <li>Click "Generate Video" and wait for the result</li>
+                </ol>
+                
+                <h4>Tips for Better Results:</h4>
+                <ul>
+                    <li>Be specific and descriptive in your prompts</li>
+                    <li>Use clear, high-quality reference images</li>
+                    <li>Higher inference steps generally produce better quality</li>
+                    <li>Enable quantization for faster generation on limited hardware</li>
+                </ul>
+                
+                <h4>Advanced Settings:</h4>
+                <ul>
+                    <li><strong>Guidance Scale:</strong> Controls how closely the model follows your prompt</li>
+                    <li><strong>Inference Steps:</strong> More steps = higher quality but slower generation</li>
+                    <li><strong>Seed:</strong> Use the same seed to reproduce results</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

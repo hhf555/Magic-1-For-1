@@ -1,120 +1,241 @@
-<div align="center">
+# Magic 1-For-1 Web Interface
 
-# Magic 1-For-1: Generating One Minute Video Clips within One Minute
+A modern, responsive web interface for the Magic 1-For-1 video generation model. This interface provides an intuitive way to generate high-quality videos from text prompts or images.
 
-</div>
-<div align="center">
-    <a href="https://magic-141.github.io/Magic-141/"><img src="https://img.shields.io/static/v1?label=Project%20Page&message=Web&color=green"></a> &ensp;
-</div>
+## Features
 
-## 📖 Overview
+### 🎬 Dual Generation Modes
+- **Text-to-Video**: Generate videos directly from text descriptions
+- **Image-to-Video**: Animate static images with text guidance
 
-**Magic 1-For-1** is an efficient video generation model designed to optimize memory usage and reduce inference latency. It decomposes the text-to-video generation task into two sub-tasks: **text-to-image generation** and **image-to-video generation**, enabling more efficient training and distillation.
+### ⚡ Advanced Controls
+- **Video Length**: Choose from 21, 41, or 61 frames
+- **Guidance Scale**: Fine-tune adherence to prompts (1.0-3.0)
+- **Inference Steps**: Balance quality vs speed (4-30 steps)
+- **Quantization**: Enable for faster generation on limited hardware
+- **Low Memory Mode**: Optimize for systems with limited VRAM
+- **Custom Seeds**: Reproduce specific results
 
-### Updates
-- **$\texttt{[2025-02.15]}$:** We are working on some clearances to release additional information for **Magic 1-For-1**. We appreciate your understanding and will share updates soon.
-- **$\texttt{[2025-02.07]}$:** We have released code for **Magic 1-For-1**.
-<!-- - 🚀 More to Come!
-We are continuously working on improving and expanding the capabilities of **Magic 1-For-1**. Contributions and collaborations are welcome! Join us in advancing the field of **interactive foundation video generation**. -->
+### 🎨 Modern UI/UX
+- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
+- **Real-time Progress**: Live updates during generation with WebSocket
+- **Interactive Gallery**: Browse and replay previous generations
+- **Drag & Drop**: Easy image uploading with preview
+- **Dark/Light Themes**: Automatic theme adaptation
 
-## 📹 Demo
+### 🚀 Performance Features
+- **WebSocket Integration**: Real-time progress updates and logs
+- **Efficient File Handling**: Optimized image upload and processing
+- **Memory Management**: Smart resource allocation for different hardware
+- **Error Recovery**: Graceful error handling with detailed feedback
 
+## Quick Start
 
-https://github.com/user-attachments/assets/94069a93-b2bb-4900-84f7-ca7603c04ecc
+### Prerequisites
+- Node.js 18+ installed
+- Python 3.9+ with Magic 1-For-1 dependencies
+- CUDA-compatible GPU (recommended)
 
+### Installation
 
-## 🛠️ Preparations
+1. **Install Node.js dependencies:**
+   ```bash
+   npm install
+   ```
 
-### Environment Setup
-First, make sure **git-lfs** is installed (https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage)
+2. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
 
-It's recommended to use conda to manage the project's dependencies. First, it is needed to create a conda environment named video-generation and specify the Python version.
-```bash
-conda create -n video_infer python=3.9  # Or your preferred Python version
-conda activate video_infer
-```
-The project's dependencies are listed in the requirements.txt file. You can use pip to install all dependencies at once.
-```bash
-pip install -r requirements.txt
-```
+3. **Start the backend server:**
+   ```bash
+   npm run server
+   ```
 
-### 📥 Downloading Model Weights (need to finish clearances)
+4. **Open your browser:**
+   Navigate to `http://localhost:3000`
 
-<!-- > ⚠️ **WARNING**: Flash Attention 3 is required for inference to avoid CUDA errors, by including `export USE_FLASH_ATTENTION3=1` -->
+### Production Deployment
 
-## 🚀 Inference 
-### Video Generation (Single GPU)
-Magic 1-For-1 supports two modes of video generation:
-1. Text to Video
+1. **Build the frontend:**
+   ```bash
+   npm run build
+   ```
 
-The script uses argparse to handle command-line arguments.  Here's a breakdown:
+2. **Start the production server:**
+   ```bash
+   npm start
+   ```
 
-`-c`, `--config`: Path to the configuration file (required for t2v).
-`-q`, `--quantization`: Enable quantization (optional, defaults to False).
-`-l`, `--quantization_level`: Quantization level (e.g., "int8", optional, defaults to "int8").
-`-m`, `--low_memory`: Enable low memory mode (optional, defaults to False).
-`--cli`: Enable command-line interactive mode (optional, defaults to False).
+## Usage Guide
 
-For Text to Video generation, run the following command:
+### Text-to-Video Generation
 
-```bash
-python test_t2v.py --config configs/test/text_to_video/4_step_t2v.yaml --quantization False 
-```
+1. **Select Mode**: Choose "Text to Video" from the mode selector
+2. **Enter Prompt**: Describe your desired video in detail
+   - Example: "A cat playing piano in a cozy living room"
+3. **Adjust Settings**: Configure advanced options if needed
+4. **Generate**: Click "Generate Video" and wait for completion
+5. **Download**: Save your generated video or add it to the gallery
 
-Alternatively, use the provided script:
+### Image-to-Video Generation
 
-```bash
-bash scripts/run_t2v.sh
-```
+1. **Select Mode**: Choose "Image to Video" from the mode selector
+2. **Upload Image**: Drag and drop or click to upload a reference image
+3. **Enter Prompt**: Describe how you want the image to move
+   - Example: "The cat starts playing the piano keys"
+4. **Configure**: Adjust generation parameters as needed
+5. **Generate**: Start the generation process
+6. **Review**: Preview and download your animated video
 
-### 💻 Quantization
-This project enables quantization techniques to optimize model performance, reduce memory footprint, and accelerate inference. We support various quantization levels, including INT8 and INT4, and provide options for using either Optimum-Quanto or TorchAO for quantization.
+### Advanced Settings
 
-1. Install dependencies:
+- **Video Length**: Longer videos take more time but provide more content
+- **Guidance Scale**: Higher values follow prompts more closely
+- **Inference Steps**: More steps generally improve quality
+- **Quantization**: Reduces memory usage and speeds up generation
+- **Low Memory Mode**: Essential for GPUs with limited VRAM
+- **Seed**: Use the same seed to reproduce identical results
 
-```bash
-pip install optimum-quanto torchao
-```
+## API Reference
 
-2. Usage
+### POST /api/generate
 
-To enable quantization, set the `--quantization` flag to `True` when running your script.
+Generate a video from text prompt and optional image.
 
-```bash
-python test_t2v.py --config configs/test/4_step_t2v.yaml --quantization True
-```
+**Parameters:**
+- `mode`: "text-to-video" or "image-to-video"
+- `prompt`: Text description of desired video
+- `image`: Image file (required for image-to-video mode)
+- `video_length`: Number of frames (21, 41, or 61)
+- `guidance_scale`: Guidance strength (1.0-3.0)
+- `inference_steps`: Number of denoising steps (4-30)
+- `quantization`: Enable quantization (boolean)
+- `low_memory`: Enable low memory mode (boolean)
+- `seed`: Random seed for reproducibility (optional)
 
-Specify the quantization level using the `--quantization_level` flag. Available options are `int8` and `int4`. 
-
-3.1 INT8 Quantization with Optimum-Quanto
-
-```bash
-python test_t2v.py --config configs/test/4_step_t2v.yaml --quantization True --quantization_level int8
-```
-
-3. Additional Notes
-
-Put the quantization file after `outputs/quant` to enable loading the pre-quanted weights. You can refer to the documentation of Optimum-Quanto and TorchAO for more advanced quantization techniques and options.
-
-### 🖥️ Multi-GPU Inference
-
-To run inference on multiple GPUs, specify the number of GPUs and their IDs. Adjust the `ring_degree` and `ulysses_degree` values in the configuration file to match the number of GPUs used.
-
-text to video
-```bash
-    bash scripts/run_flashatt3.sh test_t2v.py configs/test/t2v.yaml 1 0
-```
-
-
-## 📃 Citation
-
-Please cite the following paper when using this model:
-```bash
-@article{yi2025magic,
-  title={Magic 1-For-1: Generating One Minute Video Clips within One Minute},
-  author={Hongwei Yi, Shitong Shao, Tian Ye, Jiantong Zhao, Qingyu Yin, Michael Lingelbach, Li Yuan, Yonghong Tian, Enze Xie, Daquan Zhou},
-  journal={to be updated},
-  year={2025}
+**Response:**
+```json
+{
+  "success": true,
+  "video_url": "/outputs/web_interface/uuid/video.mp4",
+  "resolution": "960x540",
+  "job_id": "uuid"
 }
 ```
 
+### WebSocket /ws
+
+Real-time updates during generation process.
+
+**Message Types:**
+- `progress`: Generation progress updates
+- `complete`: Generation completed successfully
+- `error`: Error occurred during generation
+
+## Configuration
+
+### Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+PORT=3000
+NODE_ENV=development
+PYTHON_PATH=/path/to/python
+MODEL_PATH=/path/to/model/weights
+CUDA_VISIBLE_DEVICES=0
+```
+
+### Model Configuration
+
+The interface automatically configures the Magic 1-For-1 model based on your settings. Key configuration files:
+
+- `configs/test/4_step_t2v.yaml`: Base configuration for 4-step generation
+- Custom configs are generated per request for optimal performance
+
+## Troubleshooting
+
+### Common Issues
+
+1. **CUDA Out of Memory**
+   - Enable "Low Memory Mode"
+   - Reduce video length
+   - Enable quantization
+
+2. **Slow Generation**
+   - Enable quantization
+   - Reduce inference steps
+   - Use shorter video lengths
+
+3. **WebSocket Connection Failed**
+   - Check firewall settings
+   - Ensure port 3000 is available
+   - Restart the server
+
+4. **Model Loading Errors**
+   - Verify model weights are downloaded
+   - Check CUDA installation
+   - Ensure sufficient disk space
+
+### Performance Optimization
+
+- **GPU Memory**: Use quantization and low memory mode for GPUs with <8GB VRAM
+- **Generation Speed**: 4-step inference provides good quality/speed balance
+- **Quality**: Use 16-30 steps for highest quality output
+- **Batch Processing**: Generate multiple videos sequentially rather than simultaneously
+
+## Development
+
+### Project Structure
+
+```
+├── index.html          # Main application HTML
+├── style.css           # Comprehensive styling
+├── script.js           # Frontend JavaScript logic
+├── server/
+│   └── index.js        # Express server with WebSocket
+├── configs/            # Model configuration files
+├── uploads/            # Temporary image uploads
+└── outputs/            # Generated video outputs
+```
+
+### Adding Features
+
+1. **Frontend**: Modify `script.js` and `style.css`
+2. **Backend**: Update `server/index.js`
+3. **Model Integration**: Adjust configuration in `configs/`
+
+### Testing
+
+```bash
+# Test the API endpoint
+curl -X POST http://localhost:3000/api/health
+
+# Test WebSocket connection
+wscat -c ws://localhost:3000/ws
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+This project is part of the Magic 1-For-1 research initiative. Please refer to the main project license for usage terms.
+
+## Support
+
+For issues and questions:
+- Check the troubleshooting section above
+- Review the Magic 1-For-1 project documentation
+- Open an issue on the project repository
+
+---
+
+**Magic 1-For-1**: Generating One Minute Video Clips within One Minute
